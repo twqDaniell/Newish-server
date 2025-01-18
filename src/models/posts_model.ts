@@ -1,10 +1,13 @@
 import mongoose from "mongoose";
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
 
 export interface IPost {
   title: string;
-  content: string;
+  content?: string;
   sender: string;
+  price?: number;
+  picture?: string;
+  createdAt?: Date;
 }
 
 const postSchema = new Schema<IPost>({
@@ -12,10 +15,25 @@ const postSchema = new Schema<IPost>({
     type: String,
     required: true,
   },
-  content: String,
+  content: {
+    type: String,
+    default: "",
+  },
   sender: {
     type: String,
     required: true,
+  },
+  price: {
+    type: Number,
+    default: 0,
+  },
+  picture: {
+    type: String,
+    default: "",
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 
