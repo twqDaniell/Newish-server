@@ -99,6 +99,7 @@ const register = async (req: Request, res: Response) => {
       email: req.body.email,
       password: hashedPassword,
       profilePicture: req.body.profilePicture,
+      phoneNumber: req.body.phoneNumber
     });
     res.status(200).send(user);
   } catch (err) {
