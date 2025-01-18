@@ -14,7 +14,11 @@ Content-Type: application/json
 {
     "sender": "678bc67558414fb0b01a1441",
     "title": "Banana",
-    "content": "This is my Banana"
+    "content": "This is my Banana",
+    "price": "10",
+    "picture": "egegegrhrht",
+    "createdAt": "2021-05-01T00:00:00.000Z",
+    "timesWorn": "0"
 }
 
 
@@ -80,7 +84,8 @@ Content-Type: application/json
 {
     "username": "twqdaniell",
     "email": "daniel.ar.mcl@gmail.com",
-    "password": "password123"
+    "password": "password123",
+    "profilePicture": "ffffffffffff"
 }
 
 ###

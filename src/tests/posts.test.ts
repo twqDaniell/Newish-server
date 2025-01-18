@@ -13,6 +13,8 @@ type Post = {
   title: string;
   content: string;
   sender: string;
+  price?: number;
+  picture?: string;
 };
 
 type User = {
