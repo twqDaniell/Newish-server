@@ -7,6 +7,7 @@ export interface IUser {
   password: string;
   refreshToken: string[];
   profilePicture?: string;
+  phoneNumber?: string;
   _id: string;
 }
 
@@ -28,6 +29,10 @@ const userSchema = new Schema<IUser>({
     default: [],
   },
   profilePicture: String,
+  phoneNumber: {
+    type: String,
+    required: true,
+  }
 });
 
 const userModel = mongoose.model<IUser>("Users", userSchema);
