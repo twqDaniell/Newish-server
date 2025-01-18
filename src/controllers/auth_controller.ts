@@ -98,6 +98,7 @@ const register = async (req: Request, res: Response) => {
       username: req.body.username,
       email: req.body.email,
       password: hashedPassword,
+      profilePicture: req.body.profilePicture,
     });
     res.status(200).send(user);
   } catch (err) {

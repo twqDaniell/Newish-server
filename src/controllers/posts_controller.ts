@@ -37,17 +37,22 @@ class PostsController<IPost> {
   async getAllPosts(req: Request, res: Response) {
     const ownerFilter = req.query.sender;
     try {
+      let posts;
+  
       if (ownerFilter) {
-        const posts = await this.post.find({ sender: ownerFilter });
-        res.status(200).send(posts);
+        posts = await this.post
+          .find({ sender: ownerFilter })
+          .populate("sender", "username profilePicture");
       } else {
-        const posts = await this.post.find();
-        res.status(200).send(posts);
+        posts = await this.post.find().populate("sender", "username profilePicture");
       }
+  
+      res.status(200).send(posts);
     } catch (error) {
       res.status(400).send(error);
     }
-  };
+  }
+  
 
   async updatePost(req: Request, res: Response) {
     const postId = req.params.id;
