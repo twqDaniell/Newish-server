@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 export interface IPost {
   title: string;
   content?: string;
-  sender: string;
+  sender: mongoose.Schema.Types.ObjectId;
   price?: number;
   picture?: string;
   createdAt?: Date;
@@ -20,9 +20,10 @@ const postSchema = new Schema<IPost>({
     type: String,
     default: "",
   },
-  sender: {
-    type: String,
-    required: true,
+  sender: { 
+    type: Schema.Types.ObjectId,
+    ref: "Users", 
+    required: true 
   },
   price: {
     type: Number,
