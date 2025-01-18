@@ -8,6 +8,7 @@ export interface IPost {
   price?: number;
   picture?: string;
   createdAt?: Date;
+  timesWorn?: number;
 }
 
 const postSchema = new Schema<IPost>({
@@ -34,6 +35,10 @@ const postSchema = new Schema<IPost>({
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  timesWorn: {
+    type: Number,
+    default: 0,
   },
 });
 
