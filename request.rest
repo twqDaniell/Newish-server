@@ -12,9 +12,9 @@ POST http://localhost:3002/posts
 Content-Type: application/json
 
 {
-    "sender": "Daniel4",
-    "title": "My first post",
-    "content": "This is my first post"
+    "sender": "678bc67558414fb0b01a1441",
+    "title": "Banana",
+    "content": "This is my Banana"
 }
 
 
