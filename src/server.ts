@@ -9,12 +9,14 @@ import bodyParser from "body-parser";
 import postsRoute from "./routes/posts_route";
 import commentsRoute from "./routes/comments_route";
 import authRoute from "./routes/auth_route";
+const cors = require("cors");
 
 const db = mongoose.connection;
 db.on("error", (error) => console.error(error));
 db.once("open", () => console.log("Connected to Database"));
 
 app.use(express.json());
+app.use(cors());
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
