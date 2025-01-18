@@ -85,7 +85,8 @@ Content-Type: application/json
     "username": "twqdaniell",
     "email": "daniel.ar.mcl@gmail.com",
     "password": "password123",
-    "profilePicture": "ffffffffffff"
+    "profilePicture": "ffffffffffff",
+    "phoneNumber": "1234567890"
 }
 
 ###

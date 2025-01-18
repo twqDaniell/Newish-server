@@ -92,24 +92,39 @@ export const verifyAccessToken = (refreshToken: string | undefined) => {
 
 const register = async (req: Request, res: Response) => {
   try {
-    const password = req.body.password;
+    const { username, email, password, phoneNumber } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    console.log(req.file, req.file.path);
+    
+
+    // Handle uploaded file
+    const profilePicture = req.file ? req.file.path : undefined;
+
     const user = await userModel.create({
-      username: req.body.username,
-      email: req.body.email,
+      username,
+      email,
       password: hashedPassword,
-      profilePicture: req.body.profilePicture,
-      phoneNumber: req.body.phoneNumber
+      profilePicture,
+      phoneNumber,
     });
-    res.status(200).send(user);
+
+    res.status(200).send({
+      message: "User registered successfully",
+      user,
+    });
   } catch (err) {
-    res.status(400).send("error registering user");
+    console.error(err);
+    res.status(400).send("Error registering user");
   }
 };
+
 
 const login = async (req: Request, res: Response) => {
   try {
     const user = await userModel.findOne({ email: req.body.email });
+
+    console.log(user);
 
     if (!user) {
       res.status(400).send("wrong email or password");
@@ -117,6 +132,8 @@ const login = async (req: Request, res: Response) => {
     }
 
     const valid = await bcrypt.compare(req.body.password, user.password);
+
+    console.log(valid, req.body.password, user.password);
 
     if (!valid) {
       res.status(400).send("wrong email or password");
@@ -136,6 +153,10 @@ const login = async (req: Request, res: Response) => {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       _id: user._id,
+      profilePicture: user.profilePicture,
+      phoneNumber: user.phoneNumber,
+      email: user.email,
+      username: user.username,
     });
   } catch (err) {
     res.status(400).send("wrong email or password");
