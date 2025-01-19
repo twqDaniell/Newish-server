@@ -9,6 +9,7 @@ import bodyParser from "body-parser";
 import postsRoute from "./routes/posts_route";
 import commentsRoute from "./routes/comments_route";
 import authRoute from "./routes/auth_route";
+import usersRoute from "./routes/users_route";
 const cors = require("cors");
 
 const db = mongoose.connection;
@@ -23,10 +24,13 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use("/uploads", express.static("uploads"));
+
 app.use(cors());
 app.use("/posts", postsRoute);
 app.use("/comments", commentsRoute);
 app.use("/auth", authRoute);
+app.use("/users", usersRoute);
 
 const initApp = () => {
   return new Promise<Express>(async (resolve, reject) => {
