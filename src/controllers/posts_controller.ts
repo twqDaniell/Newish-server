@@ -58,11 +58,11 @@ class PostsController<IPost> {
       if (ownerFilter) {
         posts = await this.post
           .find({ sender: ownerFilter })
-          .populate("sender", "username profilePicture");
+          .populate("sender", "username phoneNumber profilePicture");
       } else {
         posts = await this.post
           .find()
-          .populate("sender", "username profilePicture");
+          .populate("sender", "username phoneNumber profilePicture");
       }
 
       res.status(200).send(posts);
