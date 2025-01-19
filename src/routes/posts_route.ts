@@ -3,6 +3,21 @@ const router = express.Router();
 import postsController from "../controllers/posts_controller";
 import { authMiddleware } from "../controllers/auth_controller";
 
+import multer from "multer";
+
+// Configure multer for file uploads
+const upload = multer({
+    dest: "uploads/profilePictures/",
+    limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype.startsWith("image/")) {
+        cb(null, true);
+      } else {
+        cb(new Error("Only image files are allowed!"));
+      }
+    },
+  });
+
 /**
  * @swagger
  * /posts:
@@ -33,7 +48,7 @@ import { authMiddleware } from "../controllers/auth_controller";
  *       400:
  *         description: Bad request
  */
-router.post("/", authMiddleware, postsController.createPost.bind(postsController));
+router.post("/", authMiddleware, upload.single("picture"), postsController.createPost.bind(postsController));
 
 /**
  * @swagger
@@ -131,7 +146,7 @@ router.get("/", postsController.getAllPosts.bind(postsController));
  *       404:
  *         description: Post not found
  */
-router.put("/:id", authMiddleware, postsController.updatePost.bind(postsController));
+router.put("/:id", authMiddleware, upload.single("picture"), postsController.updatePost.bind(postsController));
 
 /**
  * @swagger
@@ -158,5 +173,7 @@ router.put("/:id", authMiddleware, postsController.updatePost.bind(postsControll
  *         description: Post not found
  */
 router.delete("/:id", authMiddleware, postsController.deletePost.bind(postsController));
+
+router.put("/:id/like", authMiddleware, postsController.likePost.bind(postsController));
 
 export default router;

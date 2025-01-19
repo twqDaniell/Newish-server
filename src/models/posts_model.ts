@@ -5,10 +5,13 @@ export interface IPost {
   title: string;
   content?: string;
   sender: mongoose.Schema.Types.ObjectId;
-  price?: number;
+  newPrice?: number;
+  oldPrice?: number;
   picture?: string;
   createdAt?: Date;
   timesWorn?: number;
+  city?: string;
+  likes?: mongoose.Schema.Types.ObjectId[];
 }
 
 const postSchema = new Schema<IPost>({
@@ -25,7 +28,11 @@ const postSchema = new Schema<IPost>({
     ref: "Users", 
     required: true 
   },
-  price: {
+  newPrice: {
+    type: Number,
+    default: 0,
+  },
+  oldPrice: {
     type: Number,
     default: 0,
   },
@@ -41,6 +48,14 @@ const postSchema = new Schema<IPost>({
     type: Number,
     default: 0,
   },
+  city: {
+    type: String,
+    default: "",
+  },
+  likes: {
+    type: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    default: [],
+  } 
 });
 
 const postModel = mongoose.model<IPost>("Posts", postSchema);
