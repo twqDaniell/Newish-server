@@ -3,19 +3,21 @@ const Schema = mongoose.Schema;
 
 export interface IComment {
   _id?: string;
-  postId: string;
-  user: string;
+  postId: mongoose.Schema.Types.ObjectId;
+  user: mongoose.Schema.Types.ObjectId;
   message: string;
   createdAt?: Date;
 }
 
 const commentsSchema = new Schema<IComment>({
   postId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Posts",
     required: true,
   },
   user: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users", 
     required: true,
   },
   message: {
