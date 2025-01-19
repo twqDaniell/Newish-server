@@ -62,4 +62,6 @@ const upload = multer({
 //  */
 router.put("/:id", authMiddleware, upload.single("profilePicture"), usersController.updateUser.bind(usersController));
 
+router.put("/sell/:id", authMiddleware, usersController.sellProduct.bind(usersController));
+
 export default router;

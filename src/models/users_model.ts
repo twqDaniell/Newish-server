@@ -9,6 +9,7 @@ export interface IUser {
   profilePicture?: string;
   phoneNumber?: string;
   _id: string;
+  soldCount: number;
 }
 
 const userSchema = new Schema<IUser>({
@@ -32,6 +33,10 @@ const userSchema = new Schema<IUser>({
   phoneNumber: {
     type: String,
     required: true,
+  },
+  soldCount: {
+    type: Number,
+    default: 0,
   }
 });
 
