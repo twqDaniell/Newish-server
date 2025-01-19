@@ -146,7 +146,7 @@ router.get("/", postsController.getAllPosts.bind(postsController));
  *       404:
  *         description: Post not found
  */
-router.put("/:id", authMiddleware, postsController.updatePost.bind(postsController));
+router.put("/:id", authMiddleware, upload.single("picture"), postsController.updatePost.bind(postsController));
 
 /**
  * @swagger
@@ -173,5 +173,7 @@ router.put("/:id", authMiddleware, postsController.updatePost.bind(postsControll
  *         description: Post not found
  */
 router.delete("/:id", authMiddleware, postsController.deletePost.bind(postsController));
+
+router.put("/:id/like", authMiddleware, postsController.likePost.bind(postsController));
 
 export default router;

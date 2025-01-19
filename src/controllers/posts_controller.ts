@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Model } from "mongoose";
 import postModel, { IPost } from "../models/posts_model";
+import mongoose from "mongoose";
 class PostsController<IPost> {
   post: Model<IPost>;
   constructor(post: Model<IPost>) {
@@ -24,7 +25,8 @@ class PostsController<IPost> {
   }
 
   async createPost(req: Request, res: Response) {
-    const { title, content, oldPrice, newPrice, city, timesWorn, sender } = req.body;
+    const { title, content, oldPrice, newPrice, city, timesWorn, sender } =
+      req.body;
 
     try {
       // Access the uploaded file
@@ -38,7 +40,7 @@ class PostsController<IPost> {
         city,
         timesWorn,
         picture,
-        sender
+        sender,
       });
 
       res.status(201).json(newPost);
@@ -84,6 +86,48 @@ class PostsController<IPost> {
       res.status(400).send(error);
     }
   }
+
+  async likePost(req: Request, res: Response) {
+    const { id: postId } = req.params; // Post ID from params
+    const { userId } = req.body; // User ID from request body
+  
+    try {
+      // Validate userId
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).send({ message: "Invalid user ID" });
+      }
+  
+      // Find the post by ID
+      const post = await postModel.findById(postId);
+  
+      if (!post) {
+        return res.status(404).send({ message: "Post not found" });
+      }
+  
+      // Convert userId to the correct type (Schema.Types.ObjectId)
+      const userObjectId = mongoose.Types.ObjectId.createFromHexString(userId);
+  
+      // Check if the user has already liked the post
+      const isLiked = post.likes.some((id) => id.toString() === userObjectId.toString());
+  
+      if (isLiked) {
+        // If liked, remove the user ID from the likes array
+        post.likes = post.likes.filter((id) => id.toString() !== userObjectId.toString());
+      } else {
+        // If not liked, add the user ID to the likes array
+        post.likes.push(userObjectId as any);
+      }
+  
+      // Save the updated post
+      const updatedPost = await post.save();
+  
+      res.status(200).send(updatedPost);
+    } catch (error) {
+      console.error("Error in likePost:", error);
+      res.status(500).send({ message: "Failed to like/unlike post", error });
+    }
+  };
+  
 
   async deletePost(req: Request, res: Response) {
     const postId = req.params.id;
