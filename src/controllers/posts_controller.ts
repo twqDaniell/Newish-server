@@ -21,50 +21,69 @@ class PostsController<IPost> {
     } catch (error) {
       res.status(400).send(error);
     }
-  };
+  }
 
   async createPost(req: Request, res: Response) {
-    const post = req.body;
+    const { title, content, oldPrice, newPrice, city, timesWorn, sender } = req.body;
 
     try {
-      const newPost = await this.post.create(post);
-      res.status(201).send(newPost);
+      // Access the uploaded file
+      const picture = req.file ? req.file.path : null;
+
+      const newPost = await this.post.create({
+        title,
+        content,
+        oldPrice,
+        newPrice,
+        city,
+        timesWorn,
+        picture,
+        sender
+      });
+
+      res.status(201).json(newPost);
     } catch (error) {
-      res.status(400).send(error);
+      console.error("Error creating post:", error);
+      res.status(500).json({ error: "Failed to create post" });
     }
-  };
+  }
 
   async getAllPosts(req: Request, res: Response) {
     const ownerFilter = req.query.sender;
     try {
       let posts;
-  
+
       if (ownerFilter) {
         posts = await this.post
           .find({ sender: ownerFilter })
           .populate("sender", "username profilePicture");
       } else {
-        posts = await this.post.find().populate("sender", "username profilePicture");
+        posts = await this.post
+          .find()
+          .populate("sender", "username profilePicture");
       }
-  
+
       res.status(200).send(posts);
     } catch (error) {
       res.status(400).send(error);
     }
   }
-  
 
   async updatePost(req: Request, res: Response) {
     const postId = req.params.id;
     const updateData = req.body;
-  
+
     try {
-      const updatedPost = await this.post.findByIdAndUpdate(postId, updateData, { new: true });
+      const updatedPost = await this.post.findByIdAndUpdate(
+        postId,
+        updateData,
+        { new: true }
+      );
       res.status(200).send(updatedPost);
     } catch (error) {
       res.status(400).send(error);
     }
-  };
+  }
 
   async deletePost(req: Request, res: Response) {
     const postId = req.params.id;
@@ -75,7 +94,7 @@ class PostsController<IPost> {
     } catch (error) {
       res.status(400).send(error);
     }
-  };
-};
+  }
+}
 
 export default new PostsController(postModel);
