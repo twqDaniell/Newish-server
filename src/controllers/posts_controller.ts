@@ -52,22 +52,51 @@ class PostsController<IPost> {
 
   async getAllPosts(req: Request, res: Response) {
     const ownerFilter = req.query.sender;
+  
     try {
-      let posts;
-
-      if (ownerFilter) {
-        posts = await this.post
-          .find({ sender: ownerFilter })
-          .populate("sender", "username phoneNumber profilePicture");
-      } else {
-        posts = await this.post
-          .find()
-          .populate("sender", "username phoneNumber profilePicture");
-      }
-
-      res.status(200).send(posts);
+      const matchCondition = ownerFilter ? { sender: ownerFilter } : {};
+  
+      const postsWithCommentCount = await this.post.aggregate([
+        {
+          $match: matchCondition, // Apply the sender filter if provided
+        },
+        {
+          $lookup: {
+            from: "comments", // Name of the comments collection in MongoDB
+            localField: "_id", // Field in the posts collection
+            foreignField: "postId", // Field in the comments collection
+            as: "comments", // The joined field
+          },
+        },
+        {
+          $addFields: {
+            commentCount: { $size: "$comments" }, // Add a field for the count of comments
+          },
+        },
+        {
+          $lookup: {
+            from: "users", // Name of the users collection in MongoDB
+            localField: "sender", // Field in the posts collection
+            foreignField: "_id", // Field in the users collection
+            as: "sender", // The joined field
+          },
+        },
+        {
+          $unwind: "$sender", // Unwind the senderDetails array to include only the first matched sender
+        },
+        {
+          $project: {
+            comments: 0, // Exclude the comments array from the response
+            "sender.password": 0, // Exclude sensitive fields from the sender details
+            "sender.refreshToken": 0,
+          },
+        },
+      ]);
+  
+      res.status(200).send(postsWithCommentCount);
     } catch (error) {
-      res.status(400).send(error);
+      console.error("Error fetching posts with comment counts:", error);
+      res.status(500).send({ error: "Failed to fetch posts" });
     }
   }
 
