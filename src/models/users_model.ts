@@ -10,6 +10,7 @@ export interface IUser {
   googleId?: string;
   phoneNumber?: string;
   _id: string;
+  soldCount: number;
 }
 
 const userSchema = new Schema<IUser>({
@@ -35,6 +36,10 @@ const userSchema = new Schema<IUser>({
     required: false,
   },
   googleId: { type: String, required: false },
+  soldCount: {
+    type: Number,
+    default: 0,
+  }
 });
 
 const userModel = mongoose.model<IUser>("Users", userSchema);

@@ -48,6 +48,37 @@ class UsersController<IUser> {
       res.status(500).send("Error updating user");
     }
   }
+
+  async sellProduct(req: Request, res: Response) {
+    try {
+      const { id } = req.params; // User ID from the route
+  
+      // Find the user by ID
+      const user = await userModel.findById(id);
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+  
+      // Ensure the soldCount field exists and is initialized
+      if (typeof user.soldCount !== "number") {
+        user.soldCount = 0; // Initialize if not already present
+      }
+  
+      // Increment the soldCount field
+      user.soldCount += 1;
+  
+      // Save the updated user
+      await user.save();
+  
+      res.status(200).send({
+        message: "Product sold count updated successfully",
+        user,
+      });
+    } catch (error) {
+      console.error("Error updating sold count:", error);
+      res.status(500).send("Error updating sold count");
+    }
+  }  
 }
 
 export default new UsersController(userModel);
