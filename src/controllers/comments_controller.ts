@@ -56,15 +56,15 @@ class CommentsController<IComment> {
       if (postFilter) {
         comments = await this.comment
           .find({ postId: postFilter })
-          .populate("user", "username profilePicture");
+          .populate("user", "username profilePicture googleId");
       } else if (userFilter) {
         comments = await this.comment
           .find({ user: userFilter })
-          .populate("user", "username profilePicture");
+          .populate("user", "username profilePicture googleId");
       } else {
         comments = await this.comment
           .find()
-          .populate("user", "username profilePicture");
+          .populate("user", "username profilePicture googleId");
       }
   
       res.status(200).send(comments);

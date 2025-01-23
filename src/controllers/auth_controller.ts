@@ -184,7 +184,8 @@ const login = async (req: Request, res: Response) => {
           username: user.username,
           email: user.email,
           profilePicture: user.profilePicture,
-          soldItems: user.soldItems ? user.soldItems : 0,
+          soldCount: user.soldCount ? user.soldCount : 0,
+          googleId: user.googleId,
         })
       )}`);
     } else {
