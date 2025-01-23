@@ -133,8 +133,6 @@ const login = async (req: Request, res: Response) => {
 
     const valid = await bcrypt.compare(req.body.password, user.password);
 
-    console.log(valid, req.body.password, user.password);
-
     if (!valid) {
       res.status(400).send("wrong email or password");
       return;
@@ -157,6 +155,7 @@ const login = async (req: Request, res: Response) => {
       phoneNumber: user.phoneNumber,
       email: user.email,
       username: user.username,
+      soldCount: user.soldCount
     });
   } catch (err) {
     res.status(400).send("wrong email or password");
