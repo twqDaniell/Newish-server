@@ -3,6 +3,7 @@ import userModel, { IUser } from "../models/users_model";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { Document } from "mongoose";
+import postModel from "../models/posts_model";
 
 type UserDocument = Document<unknown, {}, IUser> &
   IUser &
@@ -123,27 +124,19 @@ const login = async (req: Request, res: Response) => {
   try {
     let user: UserDocument | null = null;
 
-    // Check if this is an OAuth login
     if (req.user) {
       user = req.user as UserDocument;
     } else {
-      // Traditional login
       const { email, password } = req.body;
 
       user = await userModel.findOne({ email });
-
-      console.log('start login');
 
       if (!user) {
         res.status(400).send("Invalid email or password");
         return;
       }
 
-      // If the user is an OAuth user (e.g., Google login), skip password validation
-      if (user.googleId) {
-        // Proceed without password validation
-      } else {
-        // For traditional users, validate the password
+      if (!user.googleId) {
         if (!user.password) {
           res.status(400).send("Invalid email or password");
           return;
@@ -158,8 +151,6 @@ const login = async (req: Request, res: Response) => {
       }
     }
 
-    // At this point, user is authenticated (either via OAuth or traditional)
-
     const tokens = generateTokens(user);
 
     if (!tokens) {
@@ -167,17 +158,14 @@ const login = async (req: Request, res: Response) => {
       return;
     }
 
-    // Save the refresh token to the database
     await user.save();
 
-    // Determine response based on login type
+    const postsCount = await postModel.countDocuments({ sender: user._id });
+
     if (req.user) {
-      // OAuth login: Redirect with tokens (you can adjust as needed)
-      // For security, it's better to set tokens as HTTP-only cookies
       res.cookie("accessToken", tokens.accessToken, { httpOnly: true, secure: true });
       res.cookie("refreshToken", tokens.refreshToken, { httpOnly: true, secure: true });
-      
-      // Redirect to the client application
+
       return res.redirect(`http://localhost:3003/oauth-callback#accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}&user=${encodeURIComponent(
         JSON.stringify({
           _id: user._id,
@@ -186,10 +174,10 @@ const login = async (req: Request, res: Response) => {
           profilePicture: user.profilePicture,
           soldCount: user.soldCount ? user.soldCount : 0,
           googleId: user.googleId,
+          postsCount,
         })
       )}`);
     } else {
-      // Traditional login: Send JSON response
       res.status(200).json({
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
@@ -197,6 +185,7 @@ const login = async (req: Request, res: Response) => {
         username: user.username,
         email: user.email,
         profilePicture: user.profilePicture,
+        postsCount,
       });
       return;
     }
@@ -205,7 +194,6 @@ const login = async (req: Request, res: Response) => {
     if (!res.headersSent) {
       res.status(500).send("Internal Server Error");
     }
-    // Optionally, log that a response was already sent
     console.error("Response already sent. Cannot send 500 error.");
   }
 };
