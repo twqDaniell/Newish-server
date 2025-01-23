@@ -2,6 +2,7 @@ import express from "express";
 const router = express.Router();
 import authController from "../controllers/auth_controller";
 import multer from "multer";
+const passport = require("passport");
 
 // Configure multer for file uploads
 const upload = multer({
@@ -123,5 +124,28 @@ router.post("/logout", authController.logout);
  *         description: Invalid or expired refresh token
  */
 router.post("/refresh", authController.refresh);
+
+// Start Google OAuth flow
+router.get("/google", (req, res, next) => {
+  console.log("Redirecting to Google OAuth...");
+  next();
+}, passport.authenticate("google", { scope: ["profile", "email"] }));
+
+// Callback route after Google login
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { failureRedirect: "/" }),
+  (req, res) => {
+    // Redirect to your desired page after successful login
+    authController.login(req, res);
+  }
+);
+
+// Logout route
+router.get("/logout", (req, res) => {
+  req.logout(() => {
+    res.redirect("/");
+  });
+});
 
 export default router;

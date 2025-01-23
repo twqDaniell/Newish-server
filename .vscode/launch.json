@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "type": "node",
+        "request": "launch",
+        "name": "Launch with Nodemon",
+        "runtimeExecutable": "nodemon",
+        "program": "${workspaceFolder}/src/app.ts", // Your server's entry point
+        "restart": true,
+        "env": {
+          "NODE_ENV": "development"
+        },
+        "console": "integratedTerminal"
+      }
+    ]
+  }
+  

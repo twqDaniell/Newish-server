@@ -7,6 +7,7 @@ export interface IUser {
   password: string;
   refreshToken: string[];
   profilePicture?: string;
+  googleId?: string;
   phoneNumber?: string;
   _id: string;
   soldCount: number;
@@ -23,7 +24,7 @@ const userSchema = new Schema<IUser>({
   },
   password: {
     type: String,
-    required: true,
+    required: false,
   },
   refreshToken: {
     type: [String],
@@ -32,8 +33,9 @@ const userSchema = new Schema<IUser>({
   profilePicture: { type: String },
   phoneNumber: {
     type: String,
-    required: true,
+    required: false,
   },
+  googleId: { type: String, required: false },
   soldCount: {
     type: Number,
     default: 0,
