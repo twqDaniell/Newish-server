@@ -96,9 +96,6 @@ const register = async (req: Request, res: Response) => {
     const { username, email, password, phoneNumber } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    console.log(req.file, req.file.path);
-    
-
     // Handle uploaded file
     const profilePicture = req.file ? req.file.path : undefined;
 
