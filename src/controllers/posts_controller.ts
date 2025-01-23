@@ -52,9 +52,13 @@ class PostsController<IPost> {
 
   async getAllPosts(req: Request, res: Response) {
     const ownerFilter = req.query.sender;
-  
+    const page = parseInt(req.query.page as string) || 1; // Default to page 1 if not provided
+    const limit = parseInt(req.query.limit as string) || 8; // Default to 10 items per page
+
     try {
-      const matchCondition = ownerFilter ? { sender: ownerFilter } : {};
+      const matchCondition = ownerFilter && typeof ownerFilter === "string"
+      ? { sender: new mongoose.Types.ObjectId(ownerFilter) }
+      : {};
   
       const postsWithCommentCount = await this.post.aggregate([
         {
@@ -82,7 +86,7 @@ class PostsController<IPost> {
           },
         },
         {
-          $unwind: "$sender", // Unwind the senderDetails array to include only the first matched sender
+          $unwind: "$sender", // Unwind the sender array to include only the first matched sender
         },
         {
           $project: {
@@ -91,14 +95,30 @@ class PostsController<IPost> {
             "sender.refreshToken": 0,
           },
         },
+        { $sort: { createdAt: -1 } },
+        {
+          $skip: (page - 1) * limit, // Skip documents for previous pages
+        },
+        {
+          $limit: limit, // Limit the number of documents returned
+        },
       ]);
   
-      res.status(200).send(postsWithCommentCount);
+      // Get the total count of posts for pagination metadata
+      const totalPosts = await this.post.countDocuments(matchCondition);
+      const totalPages = Math.ceil(totalPosts / limit);
+  
+      res.status(200).send({
+        posts: postsWithCommentCount,
+        currentPage: page,
+        totalPages,
+        totalPosts,
+      });
     } catch (error) {
       console.error("Error fetching posts with comment counts:", error);
       res.status(500).send({ error: "Failed to fetch posts" });
     }
-  }
+  }  
 
   async updatePost(req: Request, res: Response) {
     const postId = req.params.id;
