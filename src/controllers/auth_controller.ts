@@ -186,6 +186,7 @@ const login = async (req: Request, res: Response) => {
         email: user.email,
         profilePicture: user.profilePicture,
         postsCount,
+        soldCount: user.soldCount ? user.soldCount : 0,
       });
       return;
     }
