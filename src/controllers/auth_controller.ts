@@ -179,6 +179,7 @@ const login = async (req: Request, res: Response) => {
           profilePicture: user.profilePicture,
           soldCount: user.soldCount ? user.soldCount : 0,
           googleId: user.googleId,
+          phoneNumber: user.phoneNumber ? user.phoneNumber : null,
           postsCount,
         })
       )}`);
@@ -191,6 +192,7 @@ const login = async (req: Request, res: Response) => {
         email: user.email.toLowerCase(),
         profilePicture: user.profilePicture,
         postsCount,
+        phoneNumber: user.phoneNumber ? user.phoneNumber : null,
         soldCount: user.soldCount ? user.soldCount : 0,
       });
       return;
