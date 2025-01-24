@@ -136,7 +136,7 @@ describe("Posts Test Suite", () => {
       .set("Authorization", "Bearer " + testUser.accessToken);
     expect(response.statusCode).toBe(200);
 
-    const responseGet = await request(app).get(`/posts/${testPosts[0]._id}`);
+    const responseGet = await request(app).get(`/posts/${testPosts[0]._id}`).set("Authorization", "Bearer " + testUser.accessToken);
     expect(responseGet.statusCode).toBe(404);
   });
 
