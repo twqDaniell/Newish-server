@@ -20,5 +20,6 @@ export default {
       "/src/server.ts",   // Exclude server file
       "/src/app.ts",      // Exclude app file
     ],
+    setupFiles: ["<rootDir>/jest.setup.ts"],
   };
   

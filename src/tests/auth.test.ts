@@ -25,6 +25,7 @@ const testUser: User = {
 
 beforeAll(async () => {
   console.log("Before all auth tests");
+  console.log(process.env.DB_CONNECTION)
   app = await appInit();
   await userModel.deleteMany(); // Clear users collection
 });

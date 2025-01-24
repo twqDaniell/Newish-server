@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import userModel from "../models/users_model";
 import { Express } from "express";
 import path from "path";
+require("dotenv").config({ path: ".env.test" });
 
 let app: Express;
 

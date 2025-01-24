@@ -3,6 +3,7 @@ import appInit from "../server";
 import mongoose from "mongoose";
 import postsModel from "../models/posts_model";
 import { Express } from "express";
+require("dotenv").config({ path: ".env.test" });
 
 let app: Express;
 

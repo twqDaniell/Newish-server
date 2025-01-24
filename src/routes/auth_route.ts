@@ -113,13 +113,41 @@ router.post("/logout", authController.logout);
  */
 router.post("/refresh", authController.refresh);
 
-// Start Google OAuth flow
+/**
+ * @swagger
+ * /auth/google:
+ *   get:
+ *     summary: Start Google OAuth flow
+ *     tags:
+ *       - Authentication
+ *     description: Redirect the user to Google's OAuth 2.0 authentication flow.
+ *     responses:
+ *       302:
+ *         description: Redirect to Google OAuth login page
+ *       500:
+ *         description: Server error
+ */
 router.get("/google", (req, res, next) => {
   console.log("Redirecting to Google OAuth...");
   next();
 }, passport.authenticate("google", { scope: ["profile", "email"] }));
 
-// Callback route after Google login
+/**
+ * @swagger
+ * /auth/google/callback:
+ *   get:
+ *     summary: Google OAuth callback
+ *     tags:
+ *       - Authentication
+ *     description: Callback route after Google OAuth login. Handles the response from Google.
+ *     responses:
+ *       302:
+ *         description: Redirect to the desired page after successful login
+ *       401:
+ *         description: Unauthorized - Failed to authenticate with Google
+ *       500:
+ *         description: Server error
+ */
 router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/" }),
@@ -129,7 +157,20 @@ router.get(
   }
 );
 
-// Logout route
+/**
+ * @swagger
+ * /auth/logout:
+ *   get:
+ *     summary: Logout a user
+ *     tags:
+ *       - Authentication
+ *     description: Logs out the current user and redirects them to the homepage.
+ *     responses:
+ *       302:
+ *         description: Successfully logged out and redirected to the homepage
+ *       500:
+ *         description: Server error
+ */
 router.get("/logout", (req, res) => {
   req.logout(() => {
     res.redirect("/");

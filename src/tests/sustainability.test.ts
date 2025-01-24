@@ -1,5 +1,5 @@
 // tests/sustainability_controller.test.ts
-
+require("dotenv").config({ path: ".env.test" });
 import { Request, Response } from 'express';
 
 // Declare mockCreate before jest.mock so it can be assigned within the factory
