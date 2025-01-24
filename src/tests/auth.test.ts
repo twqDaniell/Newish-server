@@ -72,6 +72,19 @@ describe("Authentication Test Suite", () => {
     expect(response.text).toBe("Invalid email or password");
   });
 
+  test("Fail login generate tokens", async () => {
+    const originalEnv = process.env.TOKEN_SECRET;
+    delete process.env.TOKEN_SECRET;
+
+    const response = await request(app).post("/auth/login").send({
+      email: testUser.email,
+      password: testUser.password,
+    });
+    expect(response.statusCode).toBe(500);
+
+    process.env.TOKEN_SECRET = originalEnv;
+  });
+
   test("Refresh token", async () => {
     const response = await request(app).post("/auth/refresh").send({
       refreshToken: testUser.refreshToken,
@@ -197,5 +210,16 @@ describe("Authentication Test Suite", () => {
       .attach("profilePicture", filePath);
     expect(response.statusCode).toBe(200);
     expect(response.body.user.profilePicture).toBeDefined();
+  });
+
+  test("Logout after Google OAuth", async () => {
+    // Simulate Google login callback (mocking success)
+    const callbackResponse = await request(app).get("/auth/google/callback");
+    expect(callbackResponse.statusCode).toBe(302); // Expect redirect to the app
+  
+    // Test logout functionality
+    const logoutResponse = await request(app).get("/auth/logout");
+    expect(logoutResponse.statusCode).toBe(302); // Redirect to home page
+    expect(logoutResponse.headers.location).toBe("/"); // Verify redirection path
   });
 });

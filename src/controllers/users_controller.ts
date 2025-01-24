@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Model } from "mongoose";
+import mongoose, { Model } from "mongoose";
 import userModel, { IUser } from "../models/users_model";
 import bcrypt from "bcrypt";
 
@@ -11,10 +11,14 @@ class UsersController<IUser> {
 
   async updateUser(req: Request, res: Response) {
     try {
-      const { id } = req.params; // User ID from the route
-      const { username, email, phoneNumber, password } = req.body; // Other fields from the body
+      const { id } = req.params; 
 
-      // Handle uploaded file
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).send("Invalid user ID");
+      }
+
+      const { username, email, phoneNumber, password } = req.body;
+
       const profilePicture = req.file
         ? req.file.path.replace(/\\/g, "/")
         : undefined;
@@ -52,6 +56,10 @@ class UsersController<IUser> {
   async sellProduct(req: Request, res: Response) {
     try {
       const { id } = req.params; // User ID from the route
+
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).send("Invalid user ID");
+      }
   
       // Find the user by ID
       const user = await userModel.findById(id);

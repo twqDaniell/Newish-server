@@ -147,11 +147,6 @@ const login = async (req: Request, res: Response) => {
       }
 
       if (!user.googleId) {
-        if (!user.password) {
-          res.status(400).send("Invalid email or password");
-          return;
-        }
-
         const isValidPassword = await bcrypt.compare(password, user.password);
 
         if (!isValidPassword) {
@@ -206,49 +201,6 @@ const login = async (req: Request, res: Response) => {
       res.status(500).send("Internal Server Error");
     }
     console.error("Response already sent. Cannot send 500 error.");
-  }
-};
-
-
-const logind = async (req: Request, res: Response) => {
-  try {
-    const user = await userModel.findOne({ email: req.body.email });
-
-    console.log(user);
-
-    if (!user) {
-      res.status(400).send("wrong email or password");
-      return;
-    }
-
-    const valid = await bcrypt.compare(req.body.password, user.password);
-
-    if (!valid) {
-      res.status(400).send("wrong email or password");
-      return;
-    }
-
-    const tokens = generateTokens(user);
-
-    if (!tokens) {
-      res.status(400).send("Access denied");
-      return;
-    }
-
-    await user.save();
-
-    res.status(200).send({
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      _id: user._id,
-      profilePicture: user.profilePicture,
-      phoneNumber: user.phoneNumber,
-      email: user.email,
-      username: user.username,
-      soldCount: user.soldCount
-    });
-  } catch (err) {
-    res.status(400).send("wrong email or password");
   }
 };
 
