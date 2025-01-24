@@ -42,11 +42,15 @@ export const generateTokens = (
 };
 
 export const verifyAccessToken = (refreshToken: string | undefined) => {
+  
+  
   return new Promise<UserDocument>((resolve, reject) => {
     if (!refreshToken) {
       reject("Access denied");
       return;
     }
+
+    console.log("process.env.TOKEN_SECRET", process.env.TOKEN_SECRET);
 
     if (!process.env.TOKEN_SECRET) {
       reject("Access denied");
@@ -57,6 +61,7 @@ export const verifyAccessToken = (refreshToken: string | undefined) => {
       refreshToken,
       process.env.TOKEN_SECRET,
       async (err: any, payload: any) => {
+        console.log('err', err);
         if (err) {
           reject("Access denied");
           return;
@@ -70,6 +75,9 @@ export const verifyAccessToken = (refreshToken: string | undefined) => {
           if (!user) {
             return false;
           }
+
+          console.log('user', user);
+          
 
           if (!user.refreshToken || !user.refreshToken.includes(refreshToken)) {
             user.refreshToken = [];
@@ -93,15 +101,20 @@ export const verifyAccessToken = (refreshToken: string | undefined) => {
 
 const register = async (req: Request, res: Response) => {
   try {
+    console.log('register', req.body.email);
+    
     const { username, email, password, phoneNumber } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    console.log('user' , req.body);
+    console.log('pic' , req.file ? req.file.path : undefined);
 
     // Handle uploaded file
     const profilePicture = req.file ? req.file.path : undefined;
 
     const user = await userModel.create({
       username,
-      email,
+      email: email.toLowerCase(),
       password: hashedPassword,
       profilePicture,
       phoneNumber,
@@ -126,7 +139,7 @@ const login = async (req: Request, res: Response) => {
     } else {
       const { email, password } = req.body;
 
-      user = await userModel.findOne({ email });
+      user = await userModel.findOne({ email: email.toLowerCase() });
 
       if (!user) {
         res.status(400).send("Invalid email or password");
@@ -167,7 +180,7 @@ const login = async (req: Request, res: Response) => {
         JSON.stringify({
           _id: user._id,
           username: user.username,
-          email: user.email,
+          email: user.email.toLowerCase(),
           profilePicture: user.profilePicture,
           soldCount: user.soldCount ? user.soldCount : 0,
           googleId: user.googleId,
@@ -180,7 +193,7 @@ const login = async (req: Request, res: Response) => {
         refreshToken: tokens.refreshToken,
         _id: user._id,
         username: user.username,
-        email: user.email,
+        email: user.email.toLowerCase(),
         profilePicture: user.profilePicture,
         postsCount,
         soldCount: user.soldCount ? user.soldCount : 0,
@@ -241,6 +254,8 @@ const logind = async (req: Request, res: Response) => {
 
 const logout = async (req: Request, res: Response) => {
   const refreshToken = req.body.refreshToken;
+  console.log("refreshToken", refreshToken);
+  
 
   try {
     const user = await verifyAccessToken(refreshToken);
