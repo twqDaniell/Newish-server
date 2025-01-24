@@ -52,53 +52,80 @@ class PostsController<IPost> {
 
   async getAllPosts(req: Request, res: Response) {
     const ownerFilter = req.query.sender;
-  
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 8;
+
+    console.log("getallllllllllllllllllllllllllllllllllllllllllllllllllll");
+    
+
     try {
-      const matchCondition = ownerFilter ? { sender: ownerFilter } : {};
+      const matchCondition = ownerFilter && typeof ownerFilter === "string"
+      ? { sender: new mongoose.Types.ObjectId(ownerFilter) }
+      : {};
+
+      console.log("matchCondition", matchCondition);
+      
   
       const postsWithCommentCount = await this.post.aggregate([
         {
-          $match: matchCondition, // Apply the sender filter if provided
+          $match: matchCondition, 
         },
         {
           $lookup: {
-            from: "comments", // Name of the comments collection in MongoDB
-            localField: "_id", // Field in the posts collection
-            foreignField: "postId", // Field in the comments collection
-            as: "comments", // The joined field
+            from: "comments",
+            localField: "_id", 
+            foreignField: "postId",
+            as: "comments",
           },
         },
         {
           $addFields: {
-            commentCount: { $size: "$comments" }, // Add a field for the count of comments
+            commentCount: { $size: "$comments" }, 
           },
         },
         {
           $lookup: {
-            from: "users", // Name of the users collection in MongoDB
-            localField: "sender", // Field in the posts collection
-            foreignField: "_id", // Field in the users collection
-            as: "sender", // The joined field
+            from: "users", 
+            localField: "sender",
+            foreignField: "_id",
+            as: "sender",
           },
         },
         {
-          $unwind: "$sender", // Unwind the senderDetails array to include only the first matched sender
+          $unwind: "$sender",
         },
         {
           $project: {
-            comments: 0, // Exclude the comments array from the response
-            "sender.password": 0, // Exclude sensitive fields from the sender details
+            comments: 0,
+            "sender.password": 0,
             "sender.refreshToken": 0,
           },
         },
+        { $sort: { createdAt: -1 } },
+        {
+          $skip: (page - 1) * limit,
+        },
+        {
+          $limit: limit, 
+        },
       ]);
+
+      console.log("postsWithCommentCount", postsWithCommentCount);
   
-      res.status(200).send(postsWithCommentCount);
+      const totalPosts = await this.post.countDocuments(matchCondition);
+      const totalPages = Math.ceil(totalPosts / limit);
+  
+      res.status(200).send({
+        posts: postsWithCommentCount,
+        currentPage: page,
+        totalPages,
+        totalPosts,
+      });
     } catch (error) {
       console.error("Error fetching posts with comment counts:", error);
       res.status(500).send({ error: "Failed to fetch posts" });
     }
-  }
+  }  
 
   async updatePost(req: Request, res: Response) {
     const postId = req.params.id;

@@ -3,6 +3,7 @@ import userModel, { IUser } from "../models/users_model";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { Document } from "mongoose";
+import postModel from "../models/posts_model";
 
 type UserDocument = Document<unknown, {}, IUser> &
   IUser &
@@ -41,11 +42,15 @@ export const generateTokens = (
 };
 
 export const verifyAccessToken = (refreshToken: string | undefined) => {
+  
+  
   return new Promise<UserDocument>((resolve, reject) => {
     if (!refreshToken) {
       reject("Access denied");
       return;
     }
+
+    console.log("process.env.TOKEN_SECRET", process.env.TOKEN_SECRET);
 
     if (!process.env.TOKEN_SECRET) {
       reject("Access denied");
@@ -56,6 +61,7 @@ export const verifyAccessToken = (refreshToken: string | undefined) => {
       refreshToken,
       process.env.TOKEN_SECRET,
       async (err: any, payload: any) => {
+        console.log('err', err);
         if (err) {
           reject("Access denied");
           return;
@@ -69,6 +75,9 @@ export const verifyAccessToken = (refreshToken: string | undefined) => {
           if (!user) {
             return false;
           }
+
+          console.log('user', user);
+          
 
           if (!user.refreshToken || !user.refreshToken.includes(refreshToken)) {
             user.refreshToken = [];
@@ -92,18 +101,20 @@ export const verifyAccessToken = (refreshToken: string | undefined) => {
 
 const register = async (req: Request, res: Response) => {
   try {
+    console.log('register', req.body.email);
+    
     const { username, email, password, phoneNumber } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    console.log(req.file, req.file.path);
-    
+    console.log('user' , req.body);
+    console.log('pic' , req.file ? req.file.path : undefined);
 
     // Handle uploaded file
     const profilePicture = req.file ? req.file.path : undefined;
 
     const user = await userModel.create({
       username,
-      email,
+      email: email.toLowerCase(),
       password: hashedPassword,
       profilePicture,
       phoneNumber,
@@ -123,32 +134,19 @@ const login = async (req: Request, res: Response) => {
   try {
     let user: UserDocument | null = null;
 
-    // Check if this is an OAuth login
     if (req.user) {
       user = req.user as UserDocument;
     } else {
-      // Traditional login
       const { email, password } = req.body;
 
-      user = await userModel.findOne({ email });
-
-      console.log('start login');
+      user = await userModel.findOne({ email: email.toLowerCase() });
 
       if (!user) {
         res.status(400).send("Invalid email or password");
         return;
       }
 
-      // If the user is an OAuth user (e.g., Google login), skip password validation
-      if (user.googleId) {
-        // Proceed without password validation
-      } else {
-        // For traditional users, validate the password
-        if (!user.password) {
-          res.status(400).send("Invalid email or password");
-          return;
-        }
-
+      if (!user.googleId) {
         const isValidPassword = await bcrypt.compare(password, user.password);
 
         if (!isValidPassword) {
@@ -158,8 +156,6 @@ const login = async (req: Request, res: Response) => {
       }
     }
 
-    // At this point, user is authenticated (either via OAuth or traditional)
-
     const tokens = generateTokens(user);
 
     if (!tokens) {
@@ -167,36 +163,37 @@ const login = async (req: Request, res: Response) => {
       return;
     }
 
-    // Save the refresh token to the database
     await user.save();
 
-    // Determine response based on login type
+    const postsCount = await postModel.countDocuments({ sender: user._id });
+
     if (req.user) {
-      // OAuth login: Redirect with tokens (you can adjust as needed)
-      // For security, it's better to set tokens as HTTP-only cookies
       res.cookie("accessToken", tokens.accessToken, { httpOnly: true, secure: true });
       res.cookie("refreshToken", tokens.refreshToken, { httpOnly: true, secure: true });
-      
-      // Redirect to the client application
+
       return res.redirect(`http://localhost:3003/oauth-callback#accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}&user=${encodeURIComponent(
         JSON.stringify({
           _id: user._id,
           username: user.username,
-          email: user.email,
+          email: user.email.toLowerCase(),
           profilePicture: user.profilePicture,
           soldCount: user.soldCount ? user.soldCount : 0,
           googleId: user.googleId,
+          phoneNumber: user.phoneNumber ? user.phoneNumber : null,
+          postsCount,
         })
       )}`);
     } else {
-      // Traditional login: Send JSON response
       res.status(200).json({
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
         _id: user._id,
         username: user.username,
-        email: user.email,
+        email: user.email.toLowerCase(),
         profilePicture: user.profilePicture,
+        postsCount,
+        phoneNumber: user.phoneNumber ? user.phoneNumber : null,
+        soldCount: user.soldCount ? user.soldCount : 0,
       });
       return;
     }
@@ -205,56 +202,14 @@ const login = async (req: Request, res: Response) => {
     if (!res.headersSent) {
       res.status(500).send("Internal Server Error");
     }
-    // Optionally, log that a response was already sent
     console.error("Response already sent. Cannot send 500 error.");
-  }
-};
-
-
-const logind = async (req: Request, res: Response) => {
-  try {
-    const user = await userModel.findOne({ email: req.body.email });
-
-    console.log(user);
-
-    if (!user) {
-      res.status(400).send("wrong email or password");
-      return;
-    }
-
-    const valid = await bcrypt.compare(req.body.password, user.password);
-
-    if (!valid) {
-      res.status(400).send("wrong email or password");
-      return;
-    }
-
-    const tokens = generateTokens(user);
-
-    if (!tokens) {
-      res.status(400).send("Access denied");
-      return;
-    }
-
-    await user.save();
-
-    res.status(200).send({
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      _id: user._id,
-      profilePicture: user.profilePicture,
-      phoneNumber: user.phoneNumber,
-      email: user.email,
-      username: user.username,
-      soldCount: user.soldCount
-    });
-  } catch (err) {
-    res.status(400).send("wrong email or password");
   }
 };
 
 const logout = async (req: Request, res: Response) => {
   const refreshToken = req.body.refreshToken;
+  console.log("refreshToken", refreshToken);
+  
 
   try {
     const user = await verifyAccessToken(refreshToken);

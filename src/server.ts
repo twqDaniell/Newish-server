@@ -13,6 +13,7 @@ import usersRoute from "./routes/users_route";
 const session = require("express-session");
 const passport = require("./config/passport");
 const cors = require("cors");
+import { getSustainabilityTips } from "./controllers/sustainability_controller";
 
 const db = mongoose.connection;
 db.on("error", (error) => console.error(error));
@@ -27,6 +28,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/uploads", express.static("uploads"));
+
+app.get("/api/sustainability-tips", getSustainabilityTips);
 
 // Middleware for sessions
 app.use(
