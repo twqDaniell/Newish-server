@@ -1,0 +1,109 @@
+###
+
+GET http://localhost:3002/posts
+
+###
+
+GET http://localhost:3002/posts?sender=Daniel
+
+###
+
+POST http://localhost:3002/posts
+Content-Type: application/json
+
+{
+    "sender": "678bc67558414fb0b01a1441",
+    "title": "Banana",
+    "content": "This is my Banana",
+    "price": "10",
+    "picture": "egegegrhrht",
+    "createdAt": "2021-05-01T00:00:00.000Z",
+    "timesWorn": "0"
+}
+
+
+###
+
+PUT http://localhost:3002/posts/673a1dc4b15ad7a20490df58
+Content-Type: application/json
+
+{
+    "sender": "Daniel",
+    "title": "My new updated post",
+    "content": "This is my updated post"
+}
+
+
+###
+
+GET http://localhost:3002/comments
+
+###
+
+GET http://localhost:3002/comments/673a2570b110d0b2a1908ff0
+
+###
+
+GET http://localhost:3002/comments?postId=673a1dc4b15ad7a20490df58
+
+###
+
+POST http://localhost:3002/comments
+Content-Type: application/json
+
+{
+    "postId": "673a1dc4b15ad7a20490df58",
+    "user": "Someone4",
+    "message": "Comment4",
+    "createdAt": "2021-05-01T00:00:00.000Z"
+}
+
+
+###
+
+PUT http://localhost:3002/comments/673a2570b110d0b2a1908ff0
+Content-Type: application/json
+
+{
+    "id": "673a2570b110d0b2a1908ff0",
+    "postId": "673a1dc4b15ad7a20490df58",
+    "user": "Someone3",
+    "message": "Updated Comment111",
+    "createdAt": "2021-01-01T00:00:00.000Z"
+}
+
+###
+
+DELETE http://localhost:3002/comments/673a2570b110d0b2a1908ff0
+
+###
+
+POST http://localhost:3002/auth/register
+Content-Type: application/json
+
+{
+    "username": "twqdaniell",
+    "email": "daniel.ar.mcl@gmail.com",
+    "password": "password123",
+    "profilePicture": "ffffffffffff",
+    "phoneNumber": "1234567890"
+}
+
+###
+
+POST http://localhost:3002/auth/login
+Content-Type: application/json
+
+{
+    "email": "daniel.ar.mcl@gmail.com",
+    "password": "password123"
+}
+
+###
+
+POST http://localhost:3002/auth/logout
+Content-Type: application/json
+
+{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzdkMzQwNzVlY2U1NjBhZDBmYzAyZjAiLCJyYW5kb20iOiIwLjY1OTg4MTA1NjExODI2OTEiLCJpYXQiOjE3MzYyNTg1NjksImV4cCI6MTczNjg2MzM2OX0.9ofgyakGqIjyudMg4rreZYF6AtUqEzeivH2WaU6uMeg"
+}

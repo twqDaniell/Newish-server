@@ -1,0 +1,14 @@
+[
+    {
+        "message": "Comment 1",
+        "postId": "postid1",
+        "user": "DanielTest1",
+        "createdAt": "2022-01-01T00:00:00.000Z"
+    },
+    {
+        "message": "Comment 2",
+        "postId": "postid2",
+        "user": "DanielTest2",
+        "createdAt": "2022-01-01T00:00:00.000Z"
+    }
+]
