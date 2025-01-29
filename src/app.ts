@@ -6,6 +6,11 @@ import http from "http";
 import fs from "fs";
 
 const tmpFunc = async () => {
+  console.log("Starting server...");
+  console.log("PORT", port);
+  
+  
+
   initApp().then((app) => {
     if (process.env.NODE_ENV !== "production") {
       http.createServer(app).listen(port, () => {
