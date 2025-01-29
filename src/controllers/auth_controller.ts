@@ -16,21 +16,23 @@ type UserDocument = Document<unknown, {}, IUser> &
 export const generateTokens = (
   user: IUser
 ): { accessToken: string; refreshToken: string } | null => {
-  if (!process.env.TOKEN_SECRET) {
+  const tokenSecret = process.env.TOKEN_SECRET;
+  const tokenExpire = process.env.TOKEN_EXPIRE;
+  const refreshTokenExpire = process.env.REFRESH_TOKEN_EXPIRE;
+
+  if (!tokenSecret || !tokenExpire || !refreshTokenExpire) {
     return null;
   }
 
   const random = Math.random().toString();
-  const accessToken = jwt.sign(
-    { _id: user._id, random: random },
-    process.env.TOKEN_SECRET as string,
-    { expiresIn: process.env.TOKEN_EXPIRE as string }
-  );
-  const refreshToken = jwt.sign(
-    { _id: user._id, random: random },
-    process.env.TOKEN_SECRET as string,
-    { expiresIn: process.env.REFRESH_TOKEN_EXPIRE as string }
-  );
+
+  const accessToken = jwt.sign({ _id: user._id, random }, tokenSecret, {
+    expiresIn: tokenExpire,
+  });
+
+  const refreshToken = jwt.sign({ _id: user._id, random }, tokenSecret, {
+    expiresIn: refreshTokenExpire,
+  });
 
   if (user.refreshToken == null) {
     user.refreshToken = [];
@@ -38,12 +40,10 @@ export const generateTokens = (
 
   user.refreshToken.push(refreshToken);
 
-  return { accessToken: accessToken, refreshToken: refreshToken };
+  return { accessToken, refreshToken };
 };
 
 export const verifyAccessToken = (refreshToken: string | undefined) => {
-  
-  
   return new Promise<UserDocument>((resolve, reject) => {
     if (!refreshToken) {
       reject("Access denied");
@@ -61,7 +61,7 @@ export const verifyAccessToken = (refreshToken: string | undefined) => {
       refreshToken,
       process.env.TOKEN_SECRET,
       async (err: any, payload: any) => {
-        console.log('err', err);
+        console.log("err", err);
         if (err) {
           reject("Access denied");
           return;
@@ -76,8 +76,7 @@ export const verifyAccessToken = (refreshToken: string | undefined) => {
             return false;
           }
 
-          console.log('user', user);
-          
+          console.log("user", user);
 
           if (!user.refreshToken || !user.refreshToken.includes(refreshToken)) {
             user.refreshToken = [];
@@ -101,13 +100,13 @@ export const verifyAccessToken = (refreshToken: string | undefined) => {
 
 const register = async (req: Request, res: Response) => {
   try {
-    console.log('register', req.body.email);
-    
+    console.log("register", req.body.email);
+
     const { username, email, password, phoneNumber } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    console.log('user' , req.body);
-    console.log('pic' , req.file ? req.file.path : undefined);
+    console.log("user", req.body);
+    console.log("pic", req.file ? req.file.path : undefined);
 
     // Handle uploaded file
     const profilePicture = req.file ? req.file.path : undefined;
@@ -168,21 +167,31 @@ const login = async (req: Request, res: Response) => {
     const postsCount = await postModel.countDocuments({ sender: user._id });
 
     if (req.user) {
-      res.cookie("accessToken", tokens.accessToken, { httpOnly: true, secure: true });
-      res.cookie("refreshToken", tokens.refreshToken, { httpOnly: true, secure: true });
+      res.cookie("accessToken", tokens.accessToken, {
+        httpOnly: true,
+        secure: true,
+      });
+      res.cookie("refreshToken", tokens.refreshToken, {
+        httpOnly: true,
+        secure: true,
+      });
 
-      return res.redirect(`http://localhost:3003/oauth-callback#accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}&user=${encodeURIComponent(
-        JSON.stringify({
-          _id: user._id,
-          username: user.username,
-          email: user.email.toLowerCase(),
-          profilePicture: user.profilePicture,
-          soldCount: user.soldCount ? user.soldCount : 0,
-          googleId: user.googleId,
-          phoneNumber: user.phoneNumber ? user.phoneNumber : null,
-          postsCount,
-        })
-      )}`);
+      return res.redirect(
+        `http://localhost:3003/oauth-callback#accessToken=${
+          tokens.accessToken
+        }&refreshToken=${tokens.refreshToken}&user=${encodeURIComponent(
+          JSON.stringify({
+            _id: user._id,
+            username: user.username,
+            email: user.email.toLowerCase(),
+            profilePicture: user.profilePicture,
+            soldCount: user.soldCount ? user.soldCount : 0,
+            googleId: user.googleId,
+            phoneNumber: user.phoneNumber ? user.phoneNumber : null,
+            postsCount,
+          })
+        )}`
+      );
     } else {
       res.status(200).json({
         accessToken: tokens.accessToken,
@@ -209,7 +218,6 @@ const login = async (req: Request, res: Response) => {
 const logout = async (req: Request, res: Response) => {
   const refreshToken = req.body.refreshToken;
   console.log("refreshToken", refreshToken);
-  
 
   try {
     const user = await verifyAccessToken(refreshToken);
@@ -222,53 +230,57 @@ const logout = async (req: Request, res: Response) => {
 };
 
 const refresh = async (req: Request, res: Response) => {
-    const refreshToken = req.body.refreshToken;
+  const refreshToken = req.body.refreshToken;
 
-    try {
-        const user = await verifyAccessToken(refreshToken);
+  try {
+    const user = await verifyAccessToken(refreshToken);
 
-        const tokens = generateTokens(user);
-        await user.save();
+    const tokens = generateTokens(user);
+    await user.save();
 
-        if(!tokens) {
-            res.status(400).send("Access denied");
-            return;
-        }
-
-        res.status(200).send({
-            accessToken: tokens.accessToken,
-            refreshToken: tokens.refreshToken
-        });
-    } catch (err) {
-        res.status(400).send("Access Denied");
+    if (!tokens) {
+      res.status(400).send("Access denied");
+      return;
     }
-}
+
+    res.status(200).send({
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    });
+  } catch (err) {
+    res.status(400).send("Access Denied");
+  }
+};
 
 type Payload = {
-    _id: string;
-}
+  _id: string;
+};
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    const authorization = req.headers.authorization;
-    const token = authorization && authorization.split(" ")[1];
-    if (!token) {
-        res.status(401).send("Access Denied");
-        return;
-    }
-    if (!process.env.TOKEN_SECRET) {
-        res.status(400).send("Server Error");
-        return;
-    }
+export const authMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const authorization = req.headers.authorization;
+  const token = authorization && authorization.split(" ")[1];
+  if (!token) {
+    res.status(401).send("Access Denied");
+    return;
+  }
+  if (!process.env.TOKEN_SECRET) {
+    res.status(400).send("Server Error");
+    return;
+  }
 
-    jwt.verify(token, process.env.TOKEN_SECRET, (err, payload) => {
-        if (err) {
-            res.status(401).send("Access Denied");
-            return;
-        }
-        const userId = (payload as Payload)._id;
-        req.params.userId = userId;
-        next();
-    });
+  jwt.verify(token, process.env.TOKEN_SECRET, (err, payload) => {
+    if (err) {
+      res.status(401).send("Access Denied");
+      return;
+    }
+    const userId = (payload as Payload)._id;
+    req.params.userId = userId;
+    next();
+  });
 };
 
 export default { register, login, logout, refresh };
