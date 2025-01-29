@@ -67,7 +67,7 @@ router.post("/", authMiddleware, upload.single("picture"), postsController.creat
  *       404:
  *         description: Post not found
  */
-router.get("/:id", authMiddleware, postsController.getPostById.bind(postsController));
+router.get("/:id", postsController.getPostById.bind(postsController));
 
 /**
  * @swagger
