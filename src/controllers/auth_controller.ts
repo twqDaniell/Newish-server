@@ -103,6 +103,8 @@ const register = async (req: Request, res: Response) => {
     console.log("register", req.body.email);
 
     const { username, email, password, phoneNumber } = req.body;
+    console.log("body", req.body);
+    
     const hashedPassword = await bcrypt.hash(password, 10);
 
     console.log("user", req.body);
