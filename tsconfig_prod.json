@@ -8,7 +8,10 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": false,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "typeRoots": [
+      "./node_modules/@types"
+    ]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.test.ts", "**/*.spec.ts"]
