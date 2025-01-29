@@ -7,7 +7,7 @@
     "dev": "nodemon src/app.ts",
     "start": "node app.ts",
     "test": "jest --detectOpenHandles --forceExit --runInBand",
-    "prod": "tsc -p tsconfig_prod.json &&  node ./dist/server.js"
+    "prod": "tsc -p tsconfig_prod.json &&  node ./dist/app.js"
   },
   "repository": {
     "type": "git",
