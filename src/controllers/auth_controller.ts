@@ -24,12 +24,12 @@ export const generateTokens = (
   const accessToken = jwt.sign(
     { _id: user._id, random: random },
     process.env.TOKEN_SECRET,
-    { expiresIn: process.env.TOKEN_EXPIRE }
+    { expiresIn: process.env.TOKEN_EXPIRE as string }
   );
   const refreshToken = jwt.sign(
     { _id: user._id, random: random },
     process.env.TOKEN_SECRET,
-    { expiresIn: process.env.REFRESH_TOKEN_EXPIRE }
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRE as string }
   );
 
   if (user.refreshToken == null) {
