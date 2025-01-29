@@ -1,6 +1,6 @@
 import initApp from "./server";
 import appInit from "./server";
-const port = process.env.PORT;
+const port = process.env.PORT || 4002;
 import https from "https";
 import http from "http";
 import fs from "fs";
