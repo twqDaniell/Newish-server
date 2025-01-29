@@ -36,9 +36,9 @@ import { upload } from "../utils/multer";
  *               phoneNumber:
  *                 type: string
  *                 example: "Updated User Phone Number"
- *              profilePicture:
+ *               profilePicture:
  *                type: string
- *               example: "Updated User Profile Picture"
+ *                example: "Updated User Profile Picture"
  *     responses:
  *       200:
  *         description: User updated successfully
