@@ -177,7 +177,7 @@ const login = async (req: Request, res: Response) => {
       });
 
       return res.redirect(
-        `http://localhost:3003/oauth-callback#accessToken=${
+        `http://${process.env.IP}/oauth-callback#accessToken=${
           tokens.accessToken
         }&refreshToken=${tokens.refreshToken}&user=${encodeURIComponent(
           JSON.stringify({
