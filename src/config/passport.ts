@@ -3,7 +3,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import userModel from "../models/users_model";
 
 const isProduction = process.env.NODE_ENV === "production";
-const callbackURL = isProduction ? `https://${process.env.DOMAIN}.nip.io:${process.env.PORT}/auth/google/callback` : `http://${process.env.DOMAIN}:${process.env.PORT}/auth/google/callback`;
+const callbackURL = isProduction ? `https://${process.env.DOMAIN}:${process.env.PORT}/auth/google/callback` : `http://${process.env.DOMAIN}:${process.env.PORT}/auth/google/callback`;
 
 passport.use(
   new GoogleStrategy(
