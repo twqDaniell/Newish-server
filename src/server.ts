@@ -16,9 +16,13 @@ const cors = require("cors");
 import { getSustainabilityTips } from "./controllers/sustainability_controller";
 import MongoStore from "connect-mongo";
 
+console.log('here-2')
+
 const db = mongoose.connection;
 db.on("error", (error) => console.error(error));
 db.once("open", () => console.log("Connected to Database"));
+
+console.log('here-1')
 
 app.use(express.json());
 app.use(cors());
@@ -31,6 +35,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
 
 app.get("/api/sustainability-tips", getSustainabilityTips);
+
+console.log('here')
 
 // Middleware for sessions
 app.use(
@@ -45,9 +51,13 @@ app.use(
   })
 );
 
+console.log('here1')
+
 // Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
+
+console.log('here2')
 
 app.use(cors());
 app.use("/posts", postsRoute);
@@ -55,7 +65,10 @@ app.use("/comments", commentsRoute);
 app.use("/auth", authRoute);
 app.use("/users", usersRoute);
 
+console.log('here3')
+
 const initApp = () => {
+  console.log(process.env.DB_CONNECTION);
   return new Promise<Express>(async (resolve, reject) => {
     if (process.env.DB_CONNECTION == undefined) {
       reject("DB_CONNECTION is not defined");

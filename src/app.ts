@@ -1,5 +1,4 @@
 import initApp from "./server";
-import appInit from "./server";
 const port = 4000;
 import https from "https";
 import http from "http";
