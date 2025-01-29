@@ -14,6 +14,7 @@ const session = require("express-session");
 const passport = require("./config/passport");
 const cors = require("cors");
 import { getSustainabilityTips } from "./controllers/sustainability_controller";
+import MongoStore from "connect-mongo";
 
 const db = mongoose.connection;
 db.on("error", (error) => console.error(error));
@@ -37,6 +38,10 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
+    store: MongoStore.create({
+      mongoUrl: process.env.DB_CONNECTION, // Your MongoDB connection string
+      ttl: 14 * 24 * 60 * 60, // Session expiration (14 days in seconds)
+    }),
   })
 );
 
