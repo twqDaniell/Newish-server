@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import userModel, { IUser } from "../models/users_model";
-import jwt from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { Document } from "mongoose";
 import postModel from "../models/posts_model";
