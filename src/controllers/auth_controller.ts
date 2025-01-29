@@ -180,7 +180,7 @@ const login = async (req: Request, res: Response) => {
 
 
       return res.redirect(
-        `http://${process.env.CLIENT_URL}/oauth-callback#accessToken=${
+        `https://${process.env.CLIENT_URL}/oauth-callback#accessToken=${
           tokens.accessToken
         }&refreshToken=${tokens.refreshToken}&user=${encodeURIComponent(
           JSON.stringify({

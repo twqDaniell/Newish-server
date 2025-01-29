@@ -29,7 +29,7 @@ export const handleAuthSuccess = async (res: Response, user: UserDocument) => {
 
     // Send a success response or redirect with tokens
     // Here, we're redirecting to the client application
-    res.redirect(`http://${process.env.CLIENT_URL}`);
+    res.redirect(`https://${process.env.CLIENT_URL}`);
   } catch (error) {
     console.error("Token generation error:", error);
     res.status(500).send("Internal Server Error");
