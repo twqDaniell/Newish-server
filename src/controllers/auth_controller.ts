@@ -176,8 +176,9 @@ const login = async (req: Request, res: Response) => {
         secure: true,
       });
 
+
       return res.redirect(
-        `http://${process.env.IP}/oauth-callback#accessToken=${
+        `http://${process.env.CLIENT_URL}/oauth-callback#accessToken=${
           tokens.accessToken
         }&refreshToken=${tokens.refreshToken}&user=${encodeURIComponent(
           JSON.stringify({

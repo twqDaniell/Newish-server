@@ -2,12 +2,15 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import userModel from "../models/users_model";
 
+const isProduction = process.env.NODE_ENV === "production";
+const callbackURL = isProduction ? `https://${process.env.IP}.nip.io:${process.env.PORT}/auth/google/callback` : `http://${process.env.IP}:${process.env.PORT}/auth/google/callback`;
+
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: `http://${process.env.IP}:3002/auth/google/callback`,
+      callbackURL: callbackURL,
     },
     async (accessToken, refreshToken, profile, done) => {
       console.log("Google Profile:", profile);
