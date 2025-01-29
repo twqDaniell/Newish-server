@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon src/app.ts",
     "start": "node app.ts",
-    "test": "jest --detectOpenHandles --forceExit --runInBand"
+    "test": "jest --detectOpenHandles --forceExit --runInBand",
+    "prod": "tsc -p tsconfig_prod.json && node ./dist/src/app.js"
   },
   "repository": {
     "type": "git",
