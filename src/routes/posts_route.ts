@@ -132,7 +132,20 @@ router.get("/", authMiddleware, postsController.getAllPosts.bind(postsController
  *       404:
  *         description: Post not found
  */
-router.put("/:id", authMiddleware, upload.single("picture"), postsController.updatePost.bind(postsController));
+router.put(
+    "/:id",
+    authMiddleware,
+    (req, res, next) => {
+        console.log(req.headers["content-type"]);
+      if (req.headers["content-type"]?.startsWith("multipart/form-data")) {
+        upload.single("picture")(req, res, next);
+      } else {
+        next();
+      }
+    },
+    postsController.updatePost.bind(postsController)
+  );
+  
 
 /**
  * @swagger

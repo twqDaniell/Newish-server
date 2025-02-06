@@ -131,6 +131,10 @@ class PostsController<IPost> {
     const postId = req.params.id;
     const updateData = req.body;
 
+    if (req.file) {
+      updateData.picture = "uploads\\profilePictures\\" + req.file.filename;
+    } 
+
     try {
       const updatedPost = await this.post.findByIdAndUpdate(
         postId,
