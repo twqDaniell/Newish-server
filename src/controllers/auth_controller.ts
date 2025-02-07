@@ -266,6 +266,10 @@ export const authMiddleware = (
 ) => {
   const authorization = req.headers.authorization;
   const token = authorization && authorization.split(" ")[1];
+  console.log("tokeen", token);
+  console.log("process.env " + process.env.TOKEN_SECRET);
+  
+  
   if (!token) {
     res.status(401).send("Access Denied");
     return;
@@ -277,6 +281,7 @@ export const authMiddleware = (
 
   jwt.verify(token, process.env.TOKEN_SECRET, (err, payload) => {
     if (err) {
+      console.log("tokeen secret error ", err);
       res.status(401).send("Access Denied");
       return;
     }
