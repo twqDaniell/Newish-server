@@ -15,6 +15,7 @@ const passport = require("./config/passport");
 const cors = require("cors");
 import { getSustainabilityTips } from "./controllers/sustainability_controller";
 import MongoStore from "connect-mongo";
+const fs = require("fs");
 
 const db = mongoose.connection;
 db.on("error", (error) => console.error(error));
@@ -23,7 +24,9 @@ db.once("open", () => console.log("Connected to Database"));
 app.use(express.json());
 app.use(cors());
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+const swaggerDocument = JSON.parse(fs.readFileSync("./swagger.json", "utf8"));
+
+app.use("/api_docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
