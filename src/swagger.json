@@ -1,0 +1,480 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Newish API",
+    "version": "1.0.0",
+    "description": "API documentation for the Newish application"
+  },
+  "servers": [
+    {
+      "url": "Newish",
+      "description": "Local server"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "format": "password" },
+                  "phoneNumber": { "type": "string" },
+                  "profilePicture": { "type": "string", "format": "binary" }
+                },
+                "required": ["username", "email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "User registered successfully" },
+          "400": { "description": "Error registering user" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login a user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "format": "password" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "User logged in successfully" },
+          "400": { "description": "Invalid email or password" }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Logout user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": { "type": "string" }
+                },
+                "required": ["refreshToken"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Logged out successfully" },
+          "400": { "description": "Access Denied" }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "Refresh access token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": { "type": "string" }
+                },
+                "required": ["refreshToken"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "New access and refresh tokens" },
+          "400": { "description": "Access denied" }
+        }
+      }
+    },
+    "/auth/google": {
+      "get": {
+        "summary": "Redirect to Google OAuth",
+        "description": "Redirects the user to Google's OAuth login page.",
+        "responses": {
+          "302": {
+            "description": "Redirect to Google login"
+          }
+        }
+      }
+    },
+    "/auth/google/callback": {
+      "get": {
+        "summary": "Google OAuth callback",
+        "description": "Handles Google OAuth response after login. Redirects on failure.",
+        "responses": {
+          "302": {
+            "description": "Redirects to application with authentication tokens"
+          },
+          "401": {
+            "description": "Unauthorized if authentication fails"
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "put": {
+        "summary": "Update user profile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "phoneNumber": { "type": "string" },
+                  "password": { "type": "string", "format": "password" },
+                  "profilePicture": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "User updated successfully" },
+          "404": { "description": "User not found" }
+        }
+      }
+    },
+    "/users/sell/{id}": {
+      "put": {
+        "summary": "Increment user's sold product count",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Sold count updated successfully" },
+          "400": { "description": "Invalid user ID" },
+          "404": { "description": "User not found" }
+        }
+      }
+    },
+    "/posts/": {
+      "post": {
+        "summary": "Create a new post",
+        "description": "Creates a new post with an optional image.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "content": { "type": "string" },
+                  "oldPrice": { "type": "number" },
+                  "newPrice": { "type": "number" },
+                  "city": { "type": "string" },
+                  "timesWorn": { "type": "integer" },
+                  "picture": { "type": "string", "format": "binary" }
+                },
+                "required": ["title", "content", "newPrice"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Post created successfully" },
+          "400": { "description": "Invalid request" },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "get": {
+        "summary": "Get all posts",
+        "description": "Retrieve a paginated list of posts.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "List of posts" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/posts/{id}": {
+      "get": {
+        "summary": "Get a post by ID",
+        "description": "Retrieve a post using its unique ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Post retrieved successfully" },
+          "404": { "description": "Post not found" }
+        }
+      },
+      "put": {
+        "summary": "Update a post",
+        "description": "Modify an existing post, optionally updating the image.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "content": { "type": "string" },
+                  "oldPrice": { "type": "number" },
+                  "newPrice": { "type": "number" },
+                  "city": { "type": "string" },
+                  "timesWorn": { "type": "integer" }
+                }
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "content": { "type": "string" },
+                  "oldPrice": { "type": "number" },
+                  "newPrice": { "type": "number" },
+                  "city": { "type": "string" },
+                  "timesWorn": { "type": "integer" },
+                  "picture": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Post updated successfully" },
+          "400": { "description": "Invalid request" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Post not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete a post",
+        "description": "Removes a post by its ID.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Post deleted successfully" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Post not found" }
+        }
+      }
+    },
+    "/posts/{id}/like": {
+      "put": {
+        "summary": "Like or Unlike a post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Post liked/unliked successfully" },
+          "400": { "description": "Invalid request" }
+        }
+      }
+    },
+    "/comments/": {
+      "post": {
+        "summary": "Create a new comment",
+        "description": "Adds a new comment to a post.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "postId": {
+                    "type": "string",
+                    "description": "ID of the post"
+                  },
+                  "content": { "type": "string", "description": "Comment text" }
+                },
+                "required": ["postId", "content"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Comment created successfully" },
+          "400": { "description": "Invalid request" },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "get": {
+        "summary": "Get all comments",
+        "description": "Retrieve all comments, optionally filtered by post or user.",
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Filter comments by post ID"
+          },
+          {
+            "name": "user",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Filter comments by user ID"
+          }
+        ],
+        "responses": {
+          "200": { "description": "List of comments" },
+          "400": { "description": "Invalid query parameters" }
+        }
+      }
+    },
+    "/comments/{id}": {
+      "get": {
+        "summary": "Get a comment by ID",
+        "description": "Retrieve a single comment by its unique ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Comment retrieved successfully" },
+          "404": { "description": "Comment not found" }
+        }
+      },
+      "put": {
+        "summary": "Update a comment",
+        "description": "Modify an existing comment.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "description": "Updated comment text"
+                  }
+                },
+                "required": ["content"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Comment updated successfully" },
+          "400": { "description": "Invalid request" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Comment not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete a comment",
+        "description": "Removes a comment by its ID.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Comment deleted successfully" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Comment not found" }
+        }
+      }
+    },
+    "/api/sustainability-tips": {
+      "get": {
+        "summary": "Get sustainability tips",
+        "responses": {
+          "200": { "description": "Returns a list of sustainability tips" },
+          "500": { "description": "Failed to fetch sustainability tips" }
+        }
+      }
+    }
+  }
+}

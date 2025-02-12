@@ -53,7 +53,7 @@ class PostsController<IPost> {
   async getAllPosts(req: Request, res: Response) {
     const ownerFilter = req.query.sender;
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 8;    
+    const limit = parseInt(req.query.limit as string) || 20;    
   
     try {
       const matchCondition = ownerFilter && typeof ownerFilter === "string"
