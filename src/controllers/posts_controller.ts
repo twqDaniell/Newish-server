@@ -53,47 +53,49 @@ class PostsController<IPost> {
   async getAllPosts(req: Request, res: Response) {
     const ownerFilter = req.query.sender;
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 8;
-
-    console.log("getallllllllllllllllllllllllllllllllllllllllllllllllllll");
-    
-
+    const limit = parseInt(req.query.limit as string) || 8;    
+  
     try {
       const matchCondition = ownerFilter && typeof ownerFilter === "string"
-      ? { sender: new mongoose.Types.ObjectId(ownerFilter) }
-      : {};
-
-      console.log("matchCondition", matchCondition);
-      
+        ? { sender: new mongoose.Types.ObjectId(ownerFilter) }
+        : {};
+  
+      console.log(`Fetching page ${page} with matchCondition:`, matchCondition);
+  
+      const paginatedPostIds = await this.post.find(matchCondition)
+      .sort({ createdAt: -1, _id: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .select('_id');    
+  
+      const postIds = paginatedPostIds.map(p => p._id);
+  
+      console.log(`Page ${page} - Post IDs:`, postIds);
   
       const postsWithCommentCount = await this.post.aggregate([
-        {
-          $match: matchCondition, 
-        },
+        { $match: { _id: { $in: postIds } } },
         {
           $lookup: {
             from: "comments",
-            localField: "_id", 
+            localField: "_id",
             foreignField: "postId",
             as: "comments",
           },
         },
         {
           $addFields: {
-            commentCount: { $size: "$comments" }, 
+            commentCount: { $size: "$comments" },
           },
         },
         {
           $lookup: {
-            from: "users", 
+            from: "users",
             localField: "sender",
             foreignField: "_id",
             as: "sender",
           },
         },
-        {
-          $unwind: "$sender",
-        },
+        { $unwind: "$sender" },
         {
           $project: {
             comments: 0,
@@ -102,15 +104,9 @@ class PostsController<IPost> {
           },
         },
         { $sort: { createdAt: -1 } },
-        {
-          $skip: (page - 1) * limit,
-        },
-        {
-          $limit: limit, 
-        },
       ]);
-
-      console.log("postsWithCommentCount", postsWithCommentCount);
+  
+      console.log(`Page ${page} - Fetched Posts:`, postsWithCommentCount);
   
       const totalPosts = await this.post.countDocuments(matchCondition);
       const totalPages = Math.ceil(totalPosts / limit);
@@ -125,7 +121,9 @@ class PostsController<IPost> {
       console.error("Error fetching posts with comment counts:", error);
       res.status(500).send({ error: "Failed to fetch posts" });
     }
-  }  
+  }
+  
+  
 
   async updatePost(req: Request, res: Response) {
     const postId = req.params.id;
